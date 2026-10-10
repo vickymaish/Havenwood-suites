@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { bedroomOptions } from "@/data/site";
-import { getPhotosForListing } from "@/lib/photos";
+import { getLeadPhotoForListing } from "@/lib/photos";
 
 type StayOption = { bedrooms: 1 | 2 | 3; label: string; pricePerNightKES: number; maxGuests: number; description: string };
 
@@ -17,9 +17,7 @@ export default function Stays({ options = bedroomOptions }: { options?: readonly
 }
 
 function StayCard({ option }: { option: StayOption }) {
-  const photos = getPhotosForListing(option.bedrooms);
-  const preferredRoom = option.bedrooms === 1 ? "bedroom" : option.bedrooms === 2 ? "kitchen" : "exterior";
-  const lead = photos.find((photo) => photo.room === preferredRoom) ?? photos[0];
+  const lead = getLeadPhotoForListing(option.bedrooms);
   const select = () => {
     window.dispatchEvent(new CustomEvent("havenwood:bedrooms", { detail: option.bedrooms }));
     document.getElementById("booking")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });

@@ -25,7 +25,7 @@ export const photos: Photo[] = [
   photo("entry-mat", "havenwood-entry-mat.jpeg", "Entry mat and guest slippers", "other"),
   photo("exterior", "havenwood-exterior.jpeg", `${siteConfig.propertyName} exterior`, "exterior"),
   photo("hallway", "havenwood-hallway.jpeg", "Hallway and kitchen passage", "other"),
-  photo("bedroom-view", "havenwood-bedroom-view.jpeg", "Bedroom and wardrobe", "bedroom"),
+  photo("livingroom-view", "havenwood-livingroom-view.jpeg", "Living room and television", "living"),
   photo("lounge-angle", "havenwood-lounge-angle.jpeg", "Lounge from another angle", "living"),
   photo("lounge-wide", "havenwood-lounge-wide-2.jpeg", "Wide view of the furnished lounge", "living"),
   photo("lounge-tv-detail", "havenwood-lounge-tv-detail.jpeg", "Television and lounge wall", "living"),
