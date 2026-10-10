@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    useWasmBinary: true,
+    useWasmBinary: !process.env.VERCEL,
+    webpackMemoryOptimizations: true,
+    cpus: 1,
   },
 };
 

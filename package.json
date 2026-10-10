@@ -1,12 +1,18 @@
 {
-  "name": "nevel-house",
+  "name": "havenwood-suites",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "test": "tsc -p tsconfig.test.json && node scripts/run-tests.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "check:leftovers": "node scripts/check-leftovers.mjs",
+    "check:rls": "node scripts/check-rls.mjs",
+    "check:admin": "node scripts/check-admin.mjs",
+    "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

@@ -12,7 +12,7 @@ const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["600", "700"], 
 export const metadata: Metadata = {
   title: property.seo.title,
   description: property.seo.description,
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"), // TODO: set the live canonical site URL.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   openGraph: {
     title: property.seo.title,
     description: property.seo.description,

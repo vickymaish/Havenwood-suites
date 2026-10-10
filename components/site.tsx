@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { property } from "@/data/property";
 import { buildWhatsAppLink } from "@/lib/contact";
@@ -19,14 +19,31 @@ export function WhatsAppLink({ children, className = "button button-outline", wh
 export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => { const onScroll = () => setScrolled(window.scrollY > 40); onScroll(); window.addEventListener("scroll", onScroll, { passive: true }); return () => window.removeEventListener("scroll", onScroll); }, []);
-  const links = [["Apartment", "#apartment"], ["Spaces", "#spaces"], ["Gallery", "#gallery"], ["Reviews", "#reviews"], ["FAQ", "#faq"]];
+  const links = [["Story", "#apartment"], ["Stays", "#stays"], ["Spaces", "#spaces"], ["Amenities", "#amenities"], ["Location", "#location"], ["FAQ", "#faq"]];
+  useEffect(() => {
+    if (!open) return;
+    const nav = document.getElementById("mobile-navigation");
+    const getItems = () => [...(nav?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])') ?? [])];
+    getItems()[0]?.focus();
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setOpen(false); menuButtonRef.current?.focus(); }
+      if (event.key !== "Tab") return;
+      const items = getItems();
+      const first = items[0], last = items.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", keydown);
+    return () => document.removeEventListener("keydown", keydown);
+  }, [open]);
   return <header className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${scrolled ? "bg-white text-[var(--text)] shadow-[var(--shadow-nav)]" : "text-white"}`}>
     <div className="wrap flex h-[76px] items-center justify-between">
       <a href="#top" className="font-heading text-xl font-bold leading-none tracking-tight">{property.name}</a>
       <nav className="hidden items-center gap-9 md:flex" aria-label="Main navigation">{links.map(([label, href]) => <a className="nav-link" href={href} key={label}>{label}</a>)}</nav>
       <div className="hidden md:block"><BookingLink className="button button-primary !min-h-10 !px-5">Book now</BookingLink></div>
-      <button className="flex h-11 w-11 flex-col items-center justify-center gap-[5px] md:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}><span className={`h-px w-5 bg-current transition-transform ${open ? "translate-y-[3px] rotate-45" : ""}`} /><span className={`h-px w-5 bg-current transition-transform ${open ? "-translate-y-[3px] -rotate-45" : ""}`} /></button>
+      <button ref={menuButtonRef} className="flex h-11 w-11 flex-col items-center justify-center gap-[5px] md:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}><span className={`h-px w-5 bg-current transition-transform ${open ? "translate-y-[3px] rotate-45" : ""}`} /><span className={`h-px w-5 bg-current transition-transform ${open ? "-translate-y-[3px] -rotate-45" : ""}`} /></button>
     </div>
     <AnimatePresence>{open && <motion.nav id="mobile-navigation" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-white text-[var(--text)] md:hidden"><div className="wrap flex flex-col pb-6">{links.map(([label, href]) => <a onClick={() => setOpen(false)} className="border-t border-[var(--border)] py-4 text-sm" href={href} key={label}>{label}</a>)}<BookingLink className="button button-primary mt-3" onClick={() => setOpen(false)}>Book now</BookingLink></div></motion.nav>}</AnimatePresence>
   </header>;

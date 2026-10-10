@@ -1,6 +1,8 @@
 import { differenceInCalendarDays, isValid, parseISO, startOfToday } from "date-fns";
 import { z } from "zod";
-import { maxGuests } from "@/data/site";
+import { bedroomOptions } from "../data/site";
+
+type StayOption = { bedrooms: 1 | 2 | 3; maxGuests: number };
 
 export function normalizeKenyanPhone(input: string): string | null {
   const cleaned = input.replace(/[\s\-()]/g, "").replace(/^\+/, "");
@@ -17,7 +19,11 @@ export function calcNights(checkIn: string, checkOut: string): number {
   return Math.max(0, differenceInCalendarDays(end, start));
 }
 
-export const enquirySchema = z.object({
+export function estimateTotalKES(nights: number, pricePerNightKES: number): number {
+  return Math.max(0, nights) * Math.max(0, pricePerNightKES);
+}
+
+const enquiryFields = z.object({
   name: z.string().trim().min(2, "Please enter your full name").max(80, "Name is too long"),
   phone: z.string().trim().refine((value) => normalizeKenyanPhone(value) !== null, "Enter a valid Kenyan number, e.g. 0712 345 678"),
   email: z.string().trim().email("Enter a valid email address"),
@@ -27,8 +33,14 @@ export const enquirySchema = z.object({
   guests: z.string().trim().regex(/^[1-9]\d{0,2}$/, "Enter a valid number of guests"),
   message: z.string().max(600, "Maximum 600 characters").optional(),
   botcheck: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (Number(data.guests) > maxGuests) ctx.addIssue({ code: "custom", path: ["guests"], message: `Maximum ${maxGuests} guests` });
+});
+
+export function createEnquirySchema(options: readonly StayOption[] = bedroomOptions) {
+  return enquiryFields.superRefine((data, ctx) => {
+  const selectedOption = options.find((option) => option.bedrooms === Number(data.bedrooms));
+  if (selectedOption && selectedOption.maxGuests > 0 && Number(data.guests) > selectedOption.maxGuests) {
+    ctx.addIssue({ code: "custom", path: ["guests"], message: `Maximum ${selectedOption.maxGuests} guests for this option` });
+  }
   const checkIn = parseISO(data.checkIn);
   const checkOut = parseISO(data.checkOut);
   if (isValid(checkIn) && checkIn < startOfToday()) {
@@ -39,14 +51,16 @@ export const enquirySchema = z.object({
     if (nights < 1) ctx.addIssue({ code: "custom", path: ["checkOut"], message: "Check-out must be after check-in" });
     if (nights > 60) ctx.addIssue({ code: "custom", path: ["checkOut"], message: "Maximum stay is 60 nights" });
   }
-});
+  });
+}
+
+export const enquirySchema = createEnquirySchema();
 
 export const bookingSelectionSchema = z.object({
   checkIn: z.string().min(1, "Choose a check-in date"),
   checkOut: z.string().min(1, "Choose a check-out date"),
   guests: z.string().trim().regex(/^[1-9]\d{0,2}$/, "Enter a valid number of guests"),
 }).superRefine((data, ctx) => {
-  if (Number(data.guests) > maxGuests) ctx.addIssue({ code: "custom", path: ["guests"], message: `Maximum ${maxGuests} guests` });
   const checkIn = parseISO(data.checkIn);
   const checkOut = parseISO(data.checkOut);
   if (isValid(checkIn) && checkIn < startOfToday()) ctx.addIssue({ code: "custom", path: ["checkIn"], message: "Check-in cannot be in the past" });

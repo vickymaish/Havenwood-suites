@@ -33,9 +33,9 @@ export default function BookingCard() {
     <form onSubmit={submit} noValidate className="grid gap-4 rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)] md:grid-cols-[1fr_1fr_.7fr_auto] md:items-end md:gap-5 md:p-6">
       <label className="grid gap-2 text-sm font-medium">Check-in<input aria-invalid={!!errors.checkIn} className={field} type="date" min={today} value={selection.checkIn} onChange={(e) => change("checkIn", e.target.value)} />{errors.checkIn && <span className="text-sm text-warning">{errors.checkIn}</span>}</label>
       <label className="grid gap-2 text-sm font-medium">Check-out<input aria-invalid={!!errors.checkOut} className={field} type="date" min={selection.checkIn || today} value={selection.checkOut} onChange={(e) => change("checkOut", e.target.value)} />{errors.checkOut && <span className="text-sm text-warning">{errors.checkOut}</span>}</label>
-      <label className="grid gap-2 text-sm font-medium">Guests<input aria-invalid={!!errors.guests} className={field} type="number" min="1" max={maxGuests} step="1" value={selection.guests} onChange={(e) => change("guests", e.target.value)} />{errors.guests && <span className="text-sm text-warning">{errors.guests}</span>}</label>
+      <label className="grid gap-2 text-sm font-medium">Guests<input aria-invalid={!!errors.guests} className={field} type="number" min="1" max={maxGuests > 0 ? maxGuests : undefined} step="1" value={selection.guests} onChange={(e) => change("guests", e.target.value)} />{errors.guests && <span className="text-sm text-warning">{errors.guests}</span>}</label>
       <button type="submit" className="button button-primary min-h-14 w-full md:w-auto">Check availability</button>
-      <p className="text-sm text-[var(--muted)] md:col-span-4">From KES {nightlyPriceKES.toLocaleString()} per night</p>
+      <p className="text-sm text-[var(--muted)] md:col-span-4">{nightlyPriceKES > 0 ? `From KES ${nightlyPriceKES.toLocaleString()} per night` : "Choose dates and guest count; the host will confirm the rate."}</p>
     </form>
   </div>;
 }

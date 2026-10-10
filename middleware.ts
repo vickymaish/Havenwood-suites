@@ -3,11 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/supabase/types";
 
 export async function middleware(request: NextRequest) {
+  if (!request.nextUrl.pathname.startsWith("/admin")) return NextResponse.next();
 	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 	const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+	if (request.nextUrl.pathname === "/admin/reset-password") return NextResponse.next();
 	if (!url || !key) {
 		const loginUrl = request.nextUrl.clone();
 		loginUrl.pathname = "/admin/login";
+		loginUrl.searchParams.set("notice", "not-configured");
 		return request.nextUrl.pathname === "/admin/login" ? NextResponse.next() : NextResponse.redirect(loginUrl);
 	}
 	let response = NextResponse.next({ request });

@@ -1,14 +1,15 @@
 import type { Photo } from "@/lib/photos";
+import { siteConfig } from "./site";
 
 const photo = (id: string, src: string, alt: string, room: Photo["room"]): Photo => ({
   id, src: `/images/${src}`, alt, room,
   width: ["havenwood-entry-mat.jpeg", "havenwood-entry-slippers.jpeg", "havenwood-exterior.jpeg", "havenwood-lounge-angle.jpeg"].includes(src) ? 1280 : 960,
   height: ["havenwood-entry-mat.jpeg", "havenwood-entry-slippers.jpeg", "havenwood-exterior.jpeg", "havenwood-lounge-angle.jpeg"].includes(src) ? 960 : 1280,
-  listings: [3], featured: id === "lounge", needsReview: false,
+  listings: [1, 2, 3], featured: id === "lounge", needsReview: false, needsNewPhoto: false,
 });
 
 export const photos: Photo[] = [
-  photo("lounge", "havenwood-lounge-wide.jpeg", "The Havenwood Suites lounge and seating area", "living"),
+  photo("lounge", "havenwood-lounge-wide.jpeg", `The ${siteConfig.propertyName} lounge and seating area`, "living"),
   photo("lounge-seating", "havenwood-lounge-seating.jpeg", "Comfortable lounge seating", "living"),
   photo("lounge-detail", "havenwood-lounge-detail.jpeg", "A closer view of the lounge", "living"),
   photo("bedroom", "havenwood-bedroom.jpeg", "Bedroom with crisp white linens", "bedroom"),
@@ -22,7 +23,7 @@ export const photos: Photo[] = [
   photo("bathroom", "havenwood-bathroom.jpeg", "Bathroom with shower", "bathroom"),
   photo("entry-slippers", "havenwood-entry-slippers.jpeg", "Slippers ready for guests", "other"),
   photo("entry-mat", "havenwood-entry-mat.jpeg", "Entry mat and guest slippers", "other"),
-  photo("exterior", "havenwood-exterior.jpeg", "Havenwood Suites exterior", "exterior"),
+  photo("exterior", "havenwood-exterior.jpeg", `${siteConfig.propertyName} exterior`, "exterior"),
   photo("hallway", "havenwood-hallway.jpeg", "Hallway and kitchen passage", "other"),
   photo("bedroom-view", "havenwood-bedroom-view.jpeg", "Bedroom and wardrobe", "bedroom"),
   photo("lounge-angle", "havenwood-lounge-angle.jpeg", "Lounge from another angle", "living"),
