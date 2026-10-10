@@ -14,7 +14,7 @@ export default async function Home() {
   const settings = await getPublicSettings();
   const hero = getHero(heroImage);
   const canonicalBase = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const mapQuery = siteConfig.locationMapQuery.startsWith("TODO") ? siteConfig.location : siteConfig.locationMapQuery;
+  const mapQuery = `${property.fullName}, ${property.location}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "VacationRental",
@@ -63,9 +63,9 @@ export default async function Home() {
       <PhotoGallery />
     </section>
     <section id="amenities" className="section-pad bg-[var(--surface)]"><div className="wrap grid gap-8 md:grid-cols-[.8fr_1.2fr] md:gap-20"><Reveal><p className="eyebrow text-[var(--accent)]">AMENITIES</p><h2 className="font-heading mt-4 text-4xl font-semibold">The details.</h2></Reveal><ul className="divide-y divide-[var(--border)]">{content.amenities.map((item) => <li key={item} className="py-4 text-sm">{item}</li>)}</ul></div></section>
-    <section id="location" className="section-pad wrap grid gap-8 md:grid-cols-2 md:items-center">
-      <div><p className="eyebrow text-[var(--accent)]">{siteConfig.city.toUpperCase()}</p><h2 className="font-heading mt-4 text-4xl font-semibold">{content.location.title}</h2><p className="mt-4 text-base leading-7 text-[var(--muted)]">{content.location.description}</p><p className="mt-4 text-sm font-medium">{siteConfig.location}</p></div>
-      <div className="relative h-[280px] overflow-hidden rounded-[var(--radius-card)] bg-[var(--surface)] md:h-[360px]"><iframe title={`Map of ${siteConfig.city}, ${siteConfig.country}`} src={`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`} className="h-full w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" /><a className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-3 text-sm font-medium shadow-[var(--shadow-soft)]" href={`https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`} target="_blank" rel="noreferrer">Open Google Maps</a></div>
+    <section id="location" className="bg-[var(--surface)]">
+      <div className="grid md:min-h-[460px] md:grid-cols-2"><div className="relative min-h-[300px] md:min-h-full"><Image src="/images/havenwood-exterior.jpeg" alt="Havenwood Suites exterior" fill sizes="(max-width: 767px) 100vw, 50vw" className="object-cover" /></div><div className="flex items-center py-14"><div className="wrap md:max-w-[560px] md:px-12"><p className="eyebrow text-[var(--accent)]">A PLACE IN ELDORET</p><h2 className="font-heading mt-4 text-4xl font-semibold">Make Eldoret your base.</h2><p className="mt-4 text-base leading-7 text-[var(--muted)]">{property.locationDescription}</p><p className="mt-4 text-sm font-medium">{property.location}</p></div></div></div>
+      <div className="wrap py-10 md:py-14"><div className="relative h-[260px] overflow-hidden rounded-[var(--radius-card)] bg-[var(--border)] md:h-[360px]"><iframe title="Map showing Havenwood Suites in Eldoret" src={property.mapEmbedUrl || `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`} className="h-full w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" /><a className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-3 text-sm font-medium shadow-sm" href={`https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`} target="_blank" rel="noreferrer">Open in Google Maps ↗</a></div></div>
     </section>
     <section id="rules" className="section-pad bg-[var(--surface)]"><div className="wrap grid gap-8 md:grid-cols-2"><div><p className="eyebrow text-[var(--accent)]">HOUSE RULES</p><h2 className="font-heading mt-4 text-4xl font-semibold">Before your stay.</h2></div><ul className="divide-y divide-[var(--border)]">{content.houseRules.map((rule) => <li key={rule} className="py-4 text-sm leading-6">{rule}</li>)}</ul></div></section>
     <section id="faq" className="section-pad wrap grid gap-8 md:grid-cols-[.8fr_1.2fr] md:gap-20"><div><p className="eyebrow text-[var(--accent)]">GOOD TO KNOW</p><h2 className="font-heading mt-4 text-4xl font-semibold">Frequently asked questions</h2></div><FAQ /></section>
