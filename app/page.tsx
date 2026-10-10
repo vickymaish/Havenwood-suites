@@ -5,16 +5,19 @@ import { BookingLink, FAQ, FloatingWhatsApp, Navigation, PhotoGallery, Reveal, W
 import Booking from "@/components/sections/Booking";
 import BookingCard from "@/components/booking/BookingCard";
 import Stays from "@/components/sections/Stays";
-import { siteConfig, bedroomOptions, heroImage, heroObjectPosition } from "@/data/site";
+import { siteConfig, heroImage, heroObjectPosition } from "@/data/site";
 import { getPublicSettings } from "@/lib/public-settings";
 import { getHero } from "@/lib/photos";
 import { buildWhatsAppLink } from "@/lib/contact";
+
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const settings = await getPublicSettings();
   const hero = getHero(heroImage);
   const canonicalBase = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const mapQuery = `${property.fullName}, ${property.location}`;
+  const configuredPrices = settings.bedroom_options.map((option) => option.pricePerNightKES).filter((price) => price > 0);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "VacationRental",
@@ -22,7 +25,7 @@ export default async function Home() {
     telephone: siteConfig.whatsappDisplay,
     address: { "@type": "PostalAddress", addressLocality: siteConfig.city, addressCountry: siteConfig.countryCode },
     image: `${canonicalBase}${hero.src}`,
-    ...(bedroomOptions.some((option) => option.pricePerNightKES > 0) ? { priceRange: `KES ${bedroomOptions.map((option) => option.pricePerNightKES).filter(Boolean).join("–")}` } : {}),
+    ...(configuredPrices.length ? { priceRange: `KES ${Math.min(...configuredPrices).toLocaleString()}–${Math.max(...configuredPrices).toLocaleString()}` } : {}),
     ...(siteConfig.ownerEmail.includes("@") ? { email: siteConfig.ownerEmail } : {}),
   };
   return <main id="top">
@@ -42,7 +45,7 @@ export default async function Home() {
         </Reveal>
       </div>
     </section>
-    <BookingCard />
+    <BookingCard settings={settings} />
     <div id="main-content" tabIndex={-1} />
     <section id="apartment" className="section-pad wrap">
       <Reveal className="mx-auto max-w-[750px] text-center">
@@ -51,7 +54,7 @@ export default async function Home() {
         <p className="mx-auto mt-5 max-w-[600px] text-base leading-7 text-[var(--muted)]">{content.story.description}</p>
       </Reveal>
     </section>
-    <Stays />
+    <Stays options={settings.bedroom_options} />
     <section id="spaces" className="section-pad wrap">
       <Reveal><p className="eyebrow text-[var(--accent)]">SPACES</p><h2 className="font-heading mt-4 text-4xl font-semibold">Make yourself at home.</h2></Reveal>
       <div className="mt-8 grid gap-x-10 sm:grid-cols-2">{content.spaces.map((space) => <article key={space.title} className="border-t border-[var(--border)] py-6"><h3 className="font-heading text-xl">{space.title}</h3><p className="mt-2 text-sm leading-6 text-[var(--muted)]">{space.description}</p></article>)}</div>

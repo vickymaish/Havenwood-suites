@@ -25,14 +25,16 @@ export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
 export function resolvePublicSettings(values: ReadonlyMap<string, unknown>): PublicSettings {
   const str = (key: string, fallback: string) => typeof values.get(key) === "string" ? values.get(key) as string : fallback;
   const num = (key: string, fallback: number | null) => typeof values.get(key) === "number" ? values.get(key) as number : fallback;
+  const fallbackPrice = num("nightly_price_kes", DEFAULT_PUBLIC_SETTINGS.nightly_price_kes);
+  const fallbackGuests = num("max_guests", DEFAULT_PUBLIC_SETTINGS.max_guests) ?? DEFAULT_PUBLIC_SETTINGS.max_guests;
   const options = DEFAULT_PUBLIC_SETTINGS.bedroom_options.map((option) => ({
     ...option,
-    pricePerNightKES: num(`bedroom_${option.bedrooms}_price`, option.pricePerNightKES) ?? option.pricePerNightKES,
-    maxGuests: num(`bedroom_${option.bedrooms}_guests`, option.maxGuests) ?? option.maxGuests,
+    pricePerNightKES: num(`bedroom_${option.bedrooms}_price`, fallbackPrice) ?? option.pricePerNightKES,
+    maxGuests: num(`bedroom_${option.bedrooms}_guests`, fallbackGuests) ?? option.maxGuests,
   }));
   return {
-    nightly_price_kes: num("nightly_price_kes", DEFAULT_PUBLIC_SETTINGS.nightly_price_kes),
-    max_guests: num("max_guests", DEFAULT_PUBLIC_SETTINGS.max_guests) ?? DEFAULT_PUBLIC_SETTINGS.max_guests,
+    nightly_price_kes: fallbackPrice,
+    max_guests: fallbackGuests,
     check_in_time: str("check_in_time", DEFAULT_PUBLIC_SETTINGS.check_in_time),
     check_out_time: str("check_out_time", DEFAULT_PUBLIC_SETTINGS.check_out_time),
     whatsapp_number: DEFAULT_PUBLIC_SETTINGS.whatsapp_number,

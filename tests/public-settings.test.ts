@@ -19,3 +19,18 @@ test("partial saved settings override only configured values", () => {
   assert.equal(settings.bedroom_options[0]?.pricePerNightKES, bedroomOptions[0].pricePerNightKES);
   assert.equal(settings.whatsapp_number, siteConfig.whatsappNumber);
 });
+
+test("fallback price and guest limit populate room options when room-specific values are absent", () => {
+  const settings = resolvePublicSettings(new Map<string, unknown>([["nightly_price_kes", 7200], ["max_guests", 5]]));
+  assert.deepEqual(settings.bedroom_options.map((option) => option.pricePerNightKES), [7200, 7200, 7200]);
+  assert.deepEqual(settings.bedroom_options.map((option) => option.maxGuests), [5, 5, 5]);
+});
+
+test("room-specific prices and guest limits take precedence over fallback values", () => {
+  const settings = resolvePublicSettings(new Map<string, unknown>([
+    ["nightly_price_kes", 7200], ["max_guests", 5],
+    ["bedroom_1_price", 4500], ["bedroom_1_guests", 2],
+  ]));
+  assert.deepEqual(settings.bedroom_options.map((option) => option.pricePerNightKES), [4500, 7200, 7200]);
+  assert.deepEqual(settings.bedroom_options.map((option) => option.maxGuests), [2, 5, 5]);
+});
