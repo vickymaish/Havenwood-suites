@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FFFFFF;
+  --surface: #F4F6F6;
+  --text: #111418;
+  --muted: #5B6670;
+  --border: #E3E8E8;
+  --accent: #0E7C7B;
+  --accent-hover: #0B6665;
+  --pure-white: #FFFFFF;
+  --warning: #725314;
+  --warning-surface: #FFF8E6;
+  --radius-card: 16px;
+  --radius-input: 12px;
+  --radius-button: 9999px;
+  --shadow-soft: 0 2px 10px rgb(17 20 24 / 8%);
+  --shadow-card: 0 12px 32px rgb(17 20 24 / 10%);
+  --shadow-nav: 0 2px 12px rgb(17 20 24 / 8%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-white: var(--pure-white);
+  --color-black: var(--text);
+  --color-warning: var(--warning);
+  --color-warning-surface: var(--warning-surface);
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-jakarta);
+  --radius-sm: var(--radius-input);
+  --radius-md: var(--radius-input);
+  --radius-lg: var(--radius-card);
+  --radius-xl: var(--radius-card);
+  --radius-2xl: var(--radius-card);
+  --radius: var(--radius-input);
+  --shadow-sm: var(--shadow-soft);
+  --shadow-lg: var(--shadow-soft);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body { margin: 0; background: var(--background); color: var(--text); font-family: var(--font-body), Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--accent); color: white; }
+.wrap { width: min(100% - 64px, 1200px); margin-inline: auto; }
+.section-pad { padding-block: clamp(72px, 8vw, 108px); }
+.eyebrow { font-size: 11px; letter-spacing: .13em; text-transform: uppercase; font-weight: 700; }
+.button { min-height: 50px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-button); padding: 0 24px; font-size: 14px; font-weight: 600; transition: background-color .2s, color .2s, border-color .2s; }
+.button-primary { background: var(--accent); color: white; }
+.button-primary:hover { background: var(--accent-hover); }
+.button-light { background: white; color: var(--text); }
+.button-outline { border-color: rgb(255 255 255 / 75%); color: white; background: rgb(17 20 24 / 18%); }
+.button-outline:hover { background: white; color: var(--text); }
+.nav-link { position: relative; font-size: 14px; font-weight: 500; }
+.nav-link:after { content: ''; position: absolute; bottom: -7px; left: 0; width: 0; height: 2px; background: currentColor; transition: width .2s; }
+.nav-link:hover:after { width: 100%; }
+.reveal { opacity: 0; transform: translateY(16px); }
+.photo { overflow: hidden; border-radius: var(--radius-card); background: var(--surface); }
+.photo img { display: block; width: 100%; height: auto; object-fit: contain; transition: transform .5s ease; }
+.photo:hover img { transform: scale(1.02); }
+.photo-gallery { columns: 2; column-gap: 16px; }
+.photo-gallery .photo { margin-bottom: 16px; }
+.lightbox-backdrop { background: rgb(17 20 24 / 96%); }
+.faq-row { border-top: 1px solid var(--border); }
+.faq-row:last-child { border-bottom: 1px solid var(--border); }
+.skip-link { position: fixed; z-index: 100; top: 8px; left: 8px; padding: 12px 16px; background: white; color: var(--text); transform: translateY(-150%); }
+.skip-link:focus { transform: translateY(0); }
+.filter-pill { min-height: 40px; border: 1px solid var(--border); border-radius: var(--radius-button); padding: 0 14px; font-size: 13px; }
+.filter-pill[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: white; }
+input, select, textarea { font-size: 16px; }
+@media (min-width: 768px) { .photo-gallery { columns: 3; column-gap: 20px; } .photo-gallery .photo { margin-bottom: 20px; } }
+@media (max-width: 767px) { .wrap { width: min(100% - 40px, 1200px); } .section-pad { padding-block: 68px; } .photo-gallery { column-gap: 10px; } .photo-gallery .photo { margin-bottom: 10px; border-radius: 12px; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *:before, *:after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
