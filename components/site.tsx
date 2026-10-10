@@ -5,8 +5,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { property } from "@/data/property";
+import { content } from "@/data/content";
 import { buildWhatsAppLink } from "@/lib/contact";
-import { getUniquePhotos, type Room } from "@/lib/photos";
+import { getUniquePhotos } from "@/lib/photos";
 
 
 export function BookingLink({ children, className = "button button-primary", onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
@@ -21,7 +22,7 @@ export function Navigation() {
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => { const onScroll = () => setScrolled(window.scrollY > 40); onScroll(); window.addEventListener("scroll", onScroll, { passive: true }); return () => window.removeEventListener("scroll", onScroll); }, []);
-  const links = [["Story", "#apartment"], ["Stays", "#stays"], ["Spaces", "#spaces"], ["Amenities", "#amenities"], ["Location", "#location"], ["FAQ", "#faq"]];
+  const links = [[content.navigation.stays, "#stays"], [content.navigation.gallery, "#gallery"], [content.navigation.findUs, "#find-us"], [content.navigation.faq, "#faq"]];
   useEffect(() => {
     if (!open) return;
     const nav = document.getElementById("mobile-navigation");
@@ -42,10 +43,10 @@ export function Navigation() {
     <div className="wrap flex h-[76px] items-center justify-between">
       <a href="#top" className="font-heading text-xl font-bold leading-none tracking-tight">{property.name}</a>
       <nav className="hidden items-center gap-9 md:flex" aria-label="Main navigation">{links.map(([label, href]) => <a className="nav-link" href={href} key={label}>{label}</a>)}</nav>
-      <div className="hidden md:block"><BookingLink className="button button-primary !min-h-10 !px-5">Book now</BookingLink></div>
+      <div className="hidden md:block"><BookingLink className="button button-primary !min-h-10 !px-5">{content.navigation.book}</BookingLink></div>
       <button ref={menuButtonRef} className="flex h-11 w-11 flex-col items-center justify-center gap-[5px] md:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}><span className={`h-px w-5 bg-current transition-transform ${open ? "translate-y-[3px] rotate-45" : ""}`} /><span className={`h-px w-5 bg-current transition-transform ${open ? "-translate-y-[3px] -rotate-45" : ""}`} /></button>
     </div>
-    <AnimatePresence>{open && <motion.nav id="mobile-navigation" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-white text-[var(--text)] md:hidden"><div className="wrap flex flex-col pb-6">{links.map(([label, href]) => <a onClick={() => setOpen(false)} className="border-t border-[var(--border)] py-4 text-sm" href={href} key={label}>{label}</a>)}<BookingLink className="button button-primary mt-3" onClick={() => setOpen(false)}>Book now</BookingLink></div></motion.nav>}</AnimatePresence>
+    <AnimatePresence>{open && <motion.nav id="mobile-navigation" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-white text-[var(--text)] md:hidden"><div className="wrap flex flex-col pb-6">{links.map(([label, href]) => <a onClick={() => setOpen(false)} className="border-t border-[var(--border)] py-4 text-sm" href={href} key={label}>{label}</a>)}<BookingLink className="button button-primary mt-3" onClick={() => setOpen(false)}>{content.navigation.book}</BookingLink></div></motion.nav>}</AnimatePresence>
   </header>;
 }
 
@@ -58,10 +59,9 @@ export function PhotoGallery() {
   const photos = getUniquePhotos();
   const [active, setActive] = useState<number | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [room, setRoom] = useState<Room | "all">("all");
-  const filtered = photos.filter((photo) => room === "all" || photo.room === room);
+  const preview = photos.slice(0, 9);
   const close = useCallback(() => setActive(null), []);
-  const move = useCallback((direction: number) => setActive((current) => current === null || filtered.length === 0 ? null : (current + direction + filtered.length) % filtered.length), [filtered.length]);
+  const move = useCallback((direction: number) => setActive((current) => current === null || photos.length === 0 ? null : (current + direction + photos.length) % photos.length), [photos.length]);
   useEffect(() => {
     if (active === null) return;
     const previous = document.activeElement as HTMLElement | null;
@@ -71,12 +71,12 @@ export function PhotoGallery() {
     return () => { document.removeEventListener("keydown", keydown); document.body.style.overflow = ""; previous?.focus(); };
   }, [active, close, move]);
   return <>
-    <div className="mt-8 flex flex-wrap gap-2"><button className="filter-pill" aria-pressed={room === "all"} onClick={() => {setRoom("all");setActive(null)}}>All rooms</button>{(["living","bedroom","kitchen","bathroom","exterior","other"] as Room[]).filter((value)=>photos.some((photo)=>photo.room===value)).map((value)=><button className="filter-pill" key={value} aria-pressed={room===value} onClick={()=>{setRoom(value);setActive(null)}}>{value === "bathroom" ? "Bathroom" : value[0]!.toUpperCase()+value.slice(1)}</button>)}</div>
-    <div className="photo-gallery mt-6 columns-2 gap-3 md:columns-3 md:gap-5">{filtered.map((photo, i) => <button key={photo.src} aria-label={`Open image: ${photo.alt}`} onClick={() => setActive(i)} className="photo mb-3 block w-full break-inside-avoid text-left md:mb-5"><Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" sizes="(max-width: 767px) 50vw, 33vw" /></button>)}</div>
-    <AnimatePresence>{active !== null && filtered[active] && <motion.div className="lightbox-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-label="Photo gallery" onClick={close} onTouchStart={(e) => setTouchStart(e.touches[0].clientX)} onTouchEnd={(e) => { if (touchStart !== null && Math.abs(e.changedTouches[0].clientX - touchStart) > 45) move(e.changedTouches[0].clientX < touchStart ? 1 : -1); setTouchStart(null); }}>
+    <div className="photo-gallery mt-8 grid grid-cols-2 gap-3 md:grid-cols-6 md:gap-4">{preview.map((photo, index) => <button key={photo.src} aria-label={`Open image: ${photo.alt}`} onClick={() => setActive(photos.findIndex((item) => item.src === photo.src))} className={`photo relative aspect-[3/2] overflow-hidden rounded-[var(--radius-card)] ${index % 3 === 1 ? "md:col-span-2 md:aspect-[4/5]" : index % 3 === 2 ? "md:col-span-2 md:aspect-square" : "md:col-span-2"}`}><Image src={photo.src} alt={photo.alt} fill loading="lazy" sizes="(max-width: 767px) 50vw, 33vw" className="object-cover" /></button>)}</div>
+    {photos.length > preview.length && <button onClick={() => setActive(0)} className="button button-outline mt-7">{content.gallery.viewAll}</button>}
+    <AnimatePresence>{active !== null && photos[active] && <motion.div className="lightbox-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-label="Photo gallery" onClick={close} onTouchStart={(e) => setTouchStart(e.touches[0].clientX)} onTouchEnd={(e) => { if (touchStart !== null && Math.abs(e.changedTouches[0].clientX - touchStart) > 45) move(e.changedTouches[0].clientX < touchStart ? 1 : -1); setTouchStart(null); }}>
       <button onClick={close} aria-label="Close gallery" className="absolute right-5 top-5 z-10 grid h-12 w-12 place-items-center text-3xl text-white">×</button>
       <button onClick={(e) => { e.stopPropagation(); move(-1); }} aria-label="Previous image" className="absolute left-2 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center text-3xl text-white md:left-8">‹</button>
-      <figure className="relative flex h-full w-full max-w-6xl flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}><div className="relative h-[78vh] w-full"><Image src={filtered[active].src} alt={filtered[active].alt} fill sizes="100vw" className="object-contain" priority /></div><figcaption className="mt-4 text-xs tracking-wide text-white/75">{filtered[active].alt} <span className="ml-3">{active + 1} / {filtered.length}</span></figcaption></figure>
+      <figure className="relative flex h-full w-full max-w-6xl flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}><div className="relative h-[78vh] w-full"><Image src={photos[active].src} alt={photos[active].alt} fill sizes="100vw" className="object-contain" priority /></div><figcaption className="mt-4 text-xs tracking-wide text-white/75">{photos[active].alt} <span className="ml-3">{active + 1} / {photos.length}</span></figcaption></figure>
       <button onClick={(e) => { e.stopPropagation(); move(1); }} aria-label="Next image" className="absolute right-2 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center text-3xl text-white md:right-8">›</button>
     </motion.div>}</AnimatePresence>
   </>;

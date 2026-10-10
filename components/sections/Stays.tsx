@@ -2,17 +2,17 @@
 
 import Image from "next/image";
 import { bedroomOptions } from "@/data/site";
+import { content } from "@/data/content";
 import { getLeadPhotoForListing } from "@/lib/photos";
+import { formatNightlyPrice } from "@/lib/pricing";
 
-type StayOption = { bedrooms: 1 | 2 | 3; label: string; pricePerNightKES: number; maxGuests: number; description: string };
+type StayOption = { bedrooms: 1 | 2 | 3; label: string; pricePerNightKES: number; priceMax?: number; maxGuests: number };
 
 export default function Stays({ options = bedroomOptions }: { options?: readonly StayOption[] }) {
   return <section id="stays" className="section-pad bg-[var(--surface)]"><div className="wrap">
-    <p className="eyebrow text-[var(--accent)]">WAYS TO STAY</p>
-    <h2 className="font-heading mt-4 text-[clamp(2.5rem,5vw,4.5rem)]">Choose your space.</h2>
-    <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">The whole house is private to you for every option. Any bedrooms you do not book stay locked.</p>
+    <h2 className="font-heading mt-4 text-[clamp(2.5rem,5vw,4.5rem)]">{content.stays.title}</h2>
     <div className="mt-10 grid gap-6 md:grid-cols-3">{options.map((option) => <StayCard key={option.bedrooms} option={option} />)}</div>
-    <p className="mt-7 text-sm font-medium">Same house. The whole house is private to you; unused bedrooms stay locked.</p>
+    <p className="mt-7 text-sm font-medium">{content.stays.note}</p>
   </div></section>;
 }
 
@@ -28,12 +28,11 @@ function StayCard({ option }: { option: StayOption }) {
       {lead && <Image src={lead.src} alt={lead.alt} fill sizes="(max-width: 767px) 100vw, 33vw" className="object-cover" />}
     </div>
     <div className="p-6">
-      <p className="eyebrow text-[var(--accent)]">PRIVATE HOUSE</p>
+      <p className="eyebrow text-[var(--accent)]">{content.stays.tags[option.bedrooms]}</p>
       <h3 className="font-heading mt-2 text-2xl">{option.label}</h3>
-      <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{option.description}</p>
-      <p className="mt-5 text-lg">{option.pricePerNightKES > 0 ? <>KES {option.pricePerNightKES.toLocaleString()} <span className="text-xs text-[var(--muted)]">per night</span></> : <span className="text-sm text-[var(--muted)]">Price to be confirmed</span>}</p>
-      <p className="mt-2 text-sm text-[var(--muted)]">{option.maxGuests > 0 ? `Up to ${option.maxGuests} guests` : "Guest limit to be confirmed"}</p>
-      <button onClick={select} className="button button-primary mt-5 w-full">Choose this option</button>
+      <p className="mt-5 text-lg">{formatNightlyPrice(option)} <span className="text-xs text-[var(--muted)]">{content.stays.perNight}</span></p>
+      {option.bedrooms !== 3 && <p className="mt-2 text-sm text-[var(--muted)]">{content.stays.sleepsUpTo} {option.maxGuests}</p>}
+      <button onClick={select} className="button button-primary mt-5 w-full">{content.stays.choose}</button>
     </div>
   </article>;
 }

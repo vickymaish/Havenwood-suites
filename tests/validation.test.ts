@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { addDays, format } from "date-fns";
 import { bedroomOptions } from "../data/site";
-import { calcNights, createEnquirySchema, enquirySchema, estimateTotalKES, normalizeKenyanPhone } from "../lib/validation";
+import { calcNights, createEnquirySchema, enquirySchema, estimateTotalKES, getGuestChoices, normalizeKenyanPhone } from "../lib/validation";
 
 test("normalizes Kenyan phone formats and rejects other or malformed numbers", () => {
   const cases: [string, string][] = [
@@ -18,11 +18,17 @@ test("normalizes Kenyan phone formats and rejects other or malformed numbers", (
 test("calculates nights and estimates totals for every bedroom option", () => {
   assert.equal(calcNights("2030-06-10", "2030-06-13"), 3);
   assert.equal(calcNights("2030-06-13", "2030-06-10"), 0);
-  const testRates = { 1: 4100, 2: 6200, 3: 8300 } as const;
   for (const option of bedroomOptions) {
-    assert.equal(estimateTotalKES(3, testRates[option.bedrooms]), 3 * testRates[option.bedrooms]);
+    assert.equal(estimateTotalKES(3, option.pricePerNightKES), 3 * option.pricePerNightKES);
   }
+  assert.equal(estimateTotalKES(3, bedroomOptions[2].pricePerNightKES), 16500);
   assert.equal(estimateTotalKES(0, 100), 0);
+});
+
+test("guest selector options follow each room's guest limit", () => {
+  assert.deepEqual(getGuestChoices(2), [1, 2]);
+  assert.deepEqual(getGuestChoices(4), [1, 2, 3, 4]);
+  assert.deepEqual(getGuestChoices(6), [1, 2, 3, 4, 5, 6]);
 });
 
 const futureDate = (days: number) => format(addDays(new Date(), days), "yyyy-MM-dd");

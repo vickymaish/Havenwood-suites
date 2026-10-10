@@ -7,6 +7,7 @@
 | GitHub repository | Client should be the organization/repository owner; developer is a collaborator | Transfer repository ownership or move it into the client's organization; confirm client admin access and branch/deployment settings. |
 | Vercel project | Client should own the team and project | Transfer the project or recreate it in the client's team; confirm domain, production branch, build settings, environment variables, and deployment access. |
 | Supabase project | Client should own the organization and project | Transfer project/organization ownership; confirm database, migrations, Auth users, RLS policies, backups, and billing access. Never provide a service-role key to the site. |
+| M-Pesa payment details | Client should own the till and control who receives it | Set the till only as the server-side `MPESA_TILL` environment variable in Vercel. Never add it to public config or `NEXT_PUBLIC_` variables. |
 | Web3Forms | Client should own the account and production access key | Replace the shared developer key with a client-owned key. Follow [Enquiry email](ENQUIRY-EMAIL.md). |
 | Domain registrar | Client should be the registrant and account owner | Identify the registrar, confirm client billing/recovery email, transfer account or domain management, and verify DNS points to the client's Vercel project. |
 

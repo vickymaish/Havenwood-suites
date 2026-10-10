@@ -6,12 +6,12 @@ A Next.js site for a private three-bedroom house in Eldoret. Guests can enquire 
 
 - `app/` contains the public site, SEO routes, and owner dashboard.
 - `components/` contains the public sections, gallery, booking selector, enquiry form, and dashboard UI.
-- `data/site.ts` is the single source for property identity, contact details, stay options, hero image, and image crop.
-- `data/content.ts` contains public copy and TODO markers for facts the owner must confirm.
+- `data/site.ts` is the single source for property identity, contact details, base prices, guest limits, hero image, and image crop.
+- `data/content.ts` contains the approved public copy.
 - `data/photos.ts` maps the house photos to listings and gallery labels.
 - `lib/` contains validation, contacts, photo selection, public settings, and Supabase clients.
 - `supabase/migrations/` contains the enquiry-bedroom migration.
-- `docs/` contains [handover](docs/HANDOVER.md), [email](docs/ENQUIRY-EMAIL.md), [admin](docs/ADMIN-GUIDE.md), [environment](docs/ENVIRONMENT.md), and [runbook](docs/RUNBOOK.md) guides.
+- `docs/` contains [handover](docs/HANDOVER.md), [email](docs/ENQUIRY-EMAIL.md), [admin](docs/ADMIN-GUIDE.md), [environment](docs/ENVIRONMENT.md), [content checklist](docs/CONTENT-CHECKLIST.md), and [runbook](docs/RUNBOOK.md) guides.
 
 ## Local development
 
@@ -23,7 +23,7 @@ A Next.js site for a private three-bedroom house in Eldoret. Guests can enquire 
 
 ## Updating property content and photos
 
-1. Confirm all TODO values in `data/site.ts` and `data/content.ts` with the owner before launch. These currently include the address, owner email, rates and guest limits for each stay option, amenities, house rules, check-in/out times, parking, Wi-Fi, cancellation terms, and review/social links.
+1. Review open owner-confirmation items in [the content checklist](docs/CONTENT-CHECKLIST.md) before launch.
 2. Edit approved page copy in `data/content.ts`.
 3. Add the owner-approved image files to `public/images`, add entries to `data/photos.ts`, and choose an existing photo for `heroImage` in `data/site.ts`. Set the desktop and mobile crop in `heroObjectPosition`.
 4. `node scripts/audit-images.mjs` reports image dimensions and hashes.
@@ -43,8 +43,9 @@ A Next.js site for a private three-bedroom house in Eldoret. Guests can enquire 
 3. Use **Reply on WhatsApp** on an enquiry.
 4. Add a blocked date range in Availability, confirm it appears, then delete it.
 5. Edit the bedroom prices in Settings and confirm the public stay cards use those values.
-6. In a private browser window while signed out, confirm `/admin` redirects to `/admin/login`.
-7. Confirm an anonymous Supabase session cannot read enquiry records. Run `npm run check:rls` with the public Supabase URL and anon key to check the policy; it does not insert data.
-8. To exercise owner permissions, provide `TEST_ADMIN_EMAIL` and `TEST_ADMIN_PASSWORD` in the process environment and run `npm run check:admin`. This signs in, lists enquiries, creates and removes a future blocked range, and signs out.
+6. Mark a test enquiry **Confirmed** and use **Send payment details**; the button appears only when the server environment has `MPESA_TILL` set.
+7. In a private browser window while signed out, confirm `/admin` redirects to `/admin/login`.
+8. Confirm an anonymous Supabase session cannot read enquiry records. Run `npm run check:rls` with the public Supabase URL and anon key to check the policy; it does not insert data.
+9. To exercise owner permissions, provide `TEST_ADMIN_EMAIL` and `TEST_ADMIN_PASSWORD` in the process environment and run `npm run check:admin`. This signs in, lists enquiries, creates and removes a future blocked range, and signs out.
 
 See [Admin guide](docs/ADMIN-GUIDE.md), [Environment guide](docs/ENVIRONMENT.md), and [Handover guide](docs/HANDOVER.md) for operating details. Keep `.env.local` private and never commit credentials.

@@ -5,13 +5,14 @@ import { addDays, format, parseISO } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { useForm, type FieldError } from "react-hook-form";
 import { bedroomOptions, siteConfig } from "@/data/site";
+import { content } from "@/data/content";
 import { buildMailtoLink, buildWhatsAppLink } from "@/lib/contact";
 import { hasBlockedDateOverlap } from "@/lib/availability";
-import { calcNights, enquirySchema, estimateTotalKES, normalizeKenyanPhone, type EnquiryValues } from "@/lib/validation";
+import { calcNights, enquirySchema, estimateTotalKES, getGuestChoices, normalizeKenyanPhone, type EnquiryValues } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/client";
 import { useBookingSelection } from "@/components/booking/BookingSelection";
 
-type SentEnquiry = EnquiryValues & { nights: number; pricePerNightKES: number; estimatedTotalKES: number };
+type SentEnquiry = EnquiryValues & { nights: number; pricePerNightKES: number; priceMax?: number; estimatedTotalKES: number };
 type FormStatus = "idle" | "sending" | "success" | "error";
 const inputClass = "min-h-12 w-full rounded-md border border-[var(--border)] bg-white/60 px-3 text-base text-[var(--text)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20";
 
@@ -30,13 +31,13 @@ function summaryText(data: SentEnquiry) {
     `Hello, I'm ${data.name}.`,
     `I'd like to enquire about ${data.nights} ${data.nights === 1 ? "night" : "nights"} at ${siteConfig.propertyName}.`,
     `Property: ${siteConfig.propertyName}; check-in: ${data.checkIn}; check-out: ${data.checkOut}; guests: ${data.guests}.`,
-    data.pricePerNightKES > 0 ? `Estimated rate: KES ${data.pricePerNightKES.toLocaleString()} per night; KES ${data.estimatedTotalKES.toLocaleString()} total.` : "Rate: to be confirmed by the host.",
+    data.pricePerNightKES > 0 ? `Estimated rate${data.priceMax && data.priceMax > data.pricePerNightKES ? " from" : ""} KES ${data.pricePerNightKES.toLocaleString()} per night; estimated total${data.priceMax && data.priceMax > data.pricePerNightKES ? " from" : ""} KES ${data.estimatedTotalKES.toLocaleString()}.` : "Rate: to be confirmed by the host.",
     `Phone: ${normalizeKenyanPhone(data.phone) ?? data.phone}; email: ${data.email}.`,
     data.message ? `Message: ${data.message}` : "",
   ].filter(Boolean).join("\n");
 }
 
-export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }: { whatsappNumber?: string; options?: readonly { bedrooms:1|2|3; label:string; pricePerNightKES:number; maxGuests:number; description:string }[] }) {
+export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }: { whatsappNumber?: string; options?: readonly { bedrooms:1|2|3; label:string; pricePerNightKES:number; priceMax?:number; maxGuests:number }[] }) {
   const { selection } = useBookingSelection();
   const [status, setStatus] = useState<FormStatus>("idle");
   const [sent, setSent] = useState<SentEnquiry | null>(null);
@@ -56,6 +57,7 @@ export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }
   }, [selection, setValue]);
   const selectedOption = options.find((option) => option.bedrooms === Number(bedrooms)) ?? options[2]!;
   const selectedMax = selectedOption.maxGuests;
+  const guestChoices = getGuestChoices(selectedMax);
   const estimate = estimateTotalKES(calcNights(checkIn, checkOut), selectedOption.pricePerNightKES);
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const checkOutMin = checkIn && !Number.isNaN(parseISO(checkIn).getTime()) ? format(addDays(parseISO(checkIn), 1), "yyyy-MM-dd") : todayStr;
@@ -105,7 +107,7 @@ export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }
       return;
     }
     const countNights = calcNights(values.checkIn, values.checkOut);
-    const submission: SentEnquiry = { ...values, nights: countNights, pricePerNightKES: option.pricePerNightKES, estimatedTotalKES: estimateTotalKES(countNights, option.pricePerNightKES) };
+    const submission: SentEnquiry = { ...values, nights: countNights, pricePerNightKES: option.pricePerNightKES, priceMax: option.priceMax, estimatedTotalKES: estimateTotalKES(countNights, option.pricePerNightKES) };
     if (values.botcheck?.trim()) {
       setSent(submission);
       setStatus("success");
@@ -176,7 +178,7 @@ export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }
   if (status === "success" && sent) return <div ref={confirmationRef} tabIndex={-1} role="status" aria-live="polite" className="rounded-lg border border-[var(--border)] bg-white/50 p-7 outline-none focus:ring-2 focus:ring-[var(--accent)]">
     <p className="eyebrow text-[var(--accent)]">ENQUIRY SENT</p>
     <h3 className="font-heading mt-4 text-3xl">Thank you, {firstName}.</h3>
-      <p className="mt-3 text-sm leading-7">Your enquiry has been received. The host can reply to {sent.email} with availability and rate details.</p>
+      <p className="mt-3 text-sm leading-7">{content.enquiryReceived}</p>
     <div className="mt-6 flex flex-wrap items-center gap-5">
       <a className="button button-primary" href={buildWhatsAppLink(details, whatsappNumber)} target="_blank" rel="noopener noreferrer">Continue on WhatsApp</a>
       <button className="min-h-11 text-sm underline underline-offset-4" onClick={() => { reset(); setSent(null); setNotice(""); setStatus("idle"); }}>Send another enquiry</button>
@@ -201,10 +203,10 @@ export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }
     <div className="grid gap-6 sm:grid-cols-3">
       <Field id="checkIn" label="Check-in" error={errors.checkIn}><input id="checkIn" type="date" min={todayStr} className={inputClass} aria-invalid={!!errors.checkIn} aria-describedby={errors.checkIn ? "checkIn-error" : undefined} {...register("checkIn")} /></Field>
       <Field id="checkOut" label="Check-out" error={errors.checkOut}><input id="checkOut" type="date" min={checkOutMin} className={inputClass} aria-invalid={!!errors.checkOut} aria-describedby={errors.checkOut ? "checkOut-error" : undefined} {...register("checkOut")} /></Field>
-      <Field id="guests" label="Number of guests" hint={selectedMax > 0 ? `Up to ${selectedMax} guests for this option.` : "Guest limit to be confirmed by the host."} error={errors.guests}><input id="guests" type="number" min="1" max={selectedMax > 0 ? selectedMax : undefined} step="1" className={inputClass} aria-invalid={!!errors.guests} aria-describedby={errors.guests ? "guests-error" : undefined} {...register("guests", selectedMax > 0 ? { max: selectedMax } : {})} /></Field>
+      <Field id="guests" label="Number of guests" hint={`Sleeps up to ${selectedMax} for this option.`} error={errors.guests}><select id="guests" className={inputClass} aria-invalid={!!errors.guests} aria-describedby={errors.guests ? "guests-error" : undefined} {...register("guests")}>{guestChoices.map((count) => <option key={count} value={count}>{count} {count === 1 ? "guest" : "guests"}</option>)}</select></Field>
     </div>
     {unavailable && <p role="status" className="rounded-lg border border-[var(--border)] bg-white/70 px-4 py-3 text-sm">Those dates look unavailable, message us on WhatsApp to check.</p>}
-    {nights > 0 && selectedOption.pricePerNightKES > 0 && <p className="rounded-[var(--radius-input)] bg-[var(--surface)] px-4 py-3 text-sm">Estimated total: KES {estimate.toLocaleString()} for {nights} {nights === 1 ? "night" : "nights"} (KES {selectedOption.pricePerNightKES.toLocaleString()} per night).</p>}
+    {nights > 0 && selectedOption.pricePerNightKES > 0 && <p className="rounded-[var(--radius-input)] bg-[var(--surface)] px-4 py-3 text-sm">Estimated total: {selectedOption.priceMax && selectedOption.priceMax > selectedOption.pricePerNightKES ? "from " : ""}KES {estimate.toLocaleString()} for {nights} {nights === 1 ? "night" : "nights"} ({selectedOption.priceMax && selectedOption.priceMax > selectedOption.pricePerNightKES ? "from " : ""}KES {selectedOption.pricePerNightKES.toLocaleString()} per night).</p>}
     <Field id="message" label="Message (optional)" hint={`${message.length}/600`} error={errors.message}><textarea id="message" rows={4} className={`${inputClass} py-3`} aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-error" : undefined} {...register("message")} /></Field>
     <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 opacity-0" {...register("botcheck")} />
     <button type="submit" disabled={status === "sending"} className="button button-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit">{status === "sending" ? "Sending..." : "Send enquiry"}</button>

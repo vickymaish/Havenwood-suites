@@ -8,7 +8,7 @@ export type PublicSettings = {
   whatsapp_number: string;
   tagline: string;
   welcome_paragraph: string;
-  bedroom_options: { bedrooms: 1 | 2 | 3; label: string; pricePerNightKES: number; maxGuests: number; description: string }[];
+  bedroom_options: { bedrooms: 1 | 2 | 3; label: string; pricePerNightKES: number; priceMax?: number; maxGuests: number }[];
 };
 
 export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
@@ -29,8 +29,8 @@ export function resolvePublicSettings(values: ReadonlyMap<string, unknown>): Pub
   const fallbackGuests = num("max_guests", DEFAULT_PUBLIC_SETTINGS.max_guests) ?? DEFAULT_PUBLIC_SETTINGS.max_guests;
   const options = DEFAULT_PUBLIC_SETTINGS.bedroom_options.map((option) => ({
     ...option,
-    pricePerNightKES: num(`bedroom_${option.bedrooms}_price`, fallbackPrice) ?? option.pricePerNightKES,
-    maxGuests: num(`bedroom_${option.bedrooms}_guests`, fallbackGuests) ?? option.maxGuests,
+    pricePerNightKES: num(`bedroom_${option.bedrooms}_price`, null) || (fallbackPrice && fallbackPrice > 0 ? fallbackPrice : option.pricePerNightKES),
+    maxGuests: num(`bedroom_${option.bedrooms}_guests`, null) || (fallbackGuests > 0 ? fallbackGuests : option.maxGuests),
   }));
   return {
     nightly_price_kes: fallbackPrice,

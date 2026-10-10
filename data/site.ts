@@ -6,26 +6,24 @@ export const siteConfig = {
   country: "Kenya",
   countryCode: "KE",
   location: "Eldoret, Kenya",
-  locationAddress: "TODO: confirm the property address in Eldoret",
-  nearbyPlaces: "TODO: confirm nearby places",
-  locationMapQuery: "TODO: replace with the confirmed property address or map pin",
-  ownerEmail: "TODO: add the client's owner email",
+  locationMapQuery: "Eldoret National Polytechnic, Eldoret, Kenya",
+  latitude: null,
+  longitude: null,
+  ownerEmail: "",
   whatsappNumber: "254116393674",
   whatsappDisplay: "+254 116 393 674",
-  checkInTime: "TODO: confirm check-in time",
-  checkOutTime: "TODO: confirm check-out time",
-  googleReviewUrl: "TODO: add Google review URL",
+  checkInTime: "3 pm to 4 pm",
+  checkOutTime: "10 am",
   socialLinks: [] as const,
 } as const;
 
-// Prices and guest limits intentionally remain zero until the owner confirms them.
 export const bedroomOptions = [
-  { bedrooms: 1, label: "1 bedroom", pricePerNightKES: 0, maxGuests: 0, description: "The whole house is private to you; two bedrooms stay locked." },
-  { bedrooms: 2, label: "2 bedrooms", pricePerNightKES: 0, maxGuests: 0, description: "The whole house is private to you; one bedroom stays locked." },
-  { bedrooms: 3, label: "Entire house", pricePerNightKES: 0, maxGuests: 0, description: "The whole three-bedroom house is private to you." },
+  { bedrooms: 1, label: "1 bedroom", pricePerNightKES: 2000, maxGuests: 2 },
+  { bedrooms: 2, label: "2 bedrooms", pricePerNightKES: 4000, maxGuests: 4 },
+  { bedrooms: 3, label: "Entire house", pricePerNightKES: 5500, priceMax: 6000, maxGuests: 6 },
 ] as const;
 
 export const heroImage: (typeof photos)[number]["src"] = "/images/havenwood-lounge-wide.jpeg";
 export const heroObjectPosition = { desktop: "center 52%", mobile: "center 50%" } as const;
-export const nightlyPriceKES = 0;
-export const maxGuests = 0;
+export const nightlyPriceKES = 2000;
+export const maxGuests = 6;

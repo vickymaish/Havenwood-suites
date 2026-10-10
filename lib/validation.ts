@@ -23,6 +23,11 @@ export function estimateTotalKES(nights: number, pricePerNightKES: number): numb
   return Math.max(0, nights) * Math.max(0, pricePerNightKES);
 }
 
+export function getGuestChoices(maxGuests: number): number[] {
+  const limit = maxGuests > 0 ? Math.floor(maxGuests) : 6;
+  return Array.from({ length: limit }, (_, index) => index + 1);
+}
+
 const enquiryFields = z.object({
   name: z.string().trim().min(2, "Please enter your full name").max(80, "Name is too long"),
   phone: z.string().trim().refine((value) => normalizeKenyanPhone(value) !== null, "Enter a valid Kenyan number, e.g. 0712 345 678"),
