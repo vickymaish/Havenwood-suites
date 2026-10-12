@@ -7,7 +7,7 @@ import { siteConfig } from "../data/site";
 test("formats each stay option's requested base price", () => {
   assert.equal(formatNightlyPrice(bedroomOptions[0]), "KES 2,000");
   assert.equal(formatNightlyPrice(bedroomOptions[1]), "KES 4,000");
-  assert.equal(formatNightlyPrice(bedroomOptions[2]), "KES 5,500 to 6,000");
+  assert.equal(formatNightlyPrice(bedroomOptions[2]), "KES 5,500");
 });
 
 test("the public site config does not contain payment till details", () => {

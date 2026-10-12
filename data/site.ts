@@ -20,7 +20,7 @@ export const siteConfig = {
 export const bedroomOptions = [
   { bedrooms: 1, label: "1 bedroom", pricePerNightKES: 2000, maxGuests: 2 },
   { bedrooms: 2, label: "2 bedrooms", pricePerNightKES: 4000, maxGuests: 4 },
-  { bedrooms: 3, label: "Entire house", pricePerNightKES: 5500, priceMax: 6000, maxGuests: 6 },
+  { bedrooms: 3, label: "Entire house", pricePerNightKES: 5500, maxGuests: 6 },
 ] as const;
 
 export const heroImage: (typeof photos)[number]["src"] = "/images/havenwood-lounge-wide.jpeg";

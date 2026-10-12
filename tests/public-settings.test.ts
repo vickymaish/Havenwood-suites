@@ -35,6 +35,15 @@ test("room-specific prices and guest limits take precedence over fallback values
   assert.deepEqual(settings.bedroom_options.map((option) => option.maxGuests), [2, 5, 5]);
 });
 
+test("entire-house price and guest limit use the saved room-specific settings", () => {
+  const settings = resolvePublicSettings(new Map<string, unknown>([
+    ["bedroom_3_price", 7300], ["bedroom_3_guests", 8],
+  ]));
+  assert.equal(settings.bedroom_options[2]?.pricePerNightKES, 7300);
+  assert.equal(settings.bedroom_options[2]?.maxGuests, 8);
+  assert.equal(settings.bedroom_options[2]?.priceMax, undefined);
+});
+
 test("legacy zero placeholders do not hide the new base prices and guest limits", () => {
   const settings = resolvePublicSettings(new Map<string, unknown>([
     ["bedroom_1_price", 0], ["bedroom_1_guests", 0],
