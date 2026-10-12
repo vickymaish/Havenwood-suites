@@ -43,6 +43,7 @@ export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }
   const [sent, setSent] = useState<SentEnquiry | null>(null);
   const [notice, setNotice] = useState("");
   const [unavailable, setUnavailable] = useState(false);
+  const [selectedBedrooms, setSelectedBedrooms] = useState<number | null>(null);
   const [dateRanges, setDateRanges] = useState<{ start: string; end: string }[]>([]);
   const confirmationRef = useRef<HTMLDivElement>(null);
   const { register, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm<EnquiryValues>({
@@ -56,12 +57,14 @@ export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }
     if (selection.guests) setValue("guests", selection.guests);
   }, [selection, setValue]);
   const selectedOption = options.find((option) => option.bedrooms === Number(bedrooms)) ?? options[2]!;
+  const selectedListing = selectedBedrooms === null ? undefined : options.find((option) => option.bedrooms === selectedBedrooms);
   const selectedMax = selectedOption.maxGuests;
   const guestChoices = getGuestChoices(selectedMax);
-  const estimate = estimateTotalKES(calcNights(checkIn, checkOut), selectedOption.pricePerNightKES);
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const checkOutMin = checkIn && !Number.isNaN(parseISO(checkIn).getTime()) ? format(addDays(parseISO(checkIn), 1), "yyyy-MM-dd") : todayStr;
   const nights = calcNights(checkIn, checkOut);
+  const validDates = checkIn >= todayStr && nights >= 1 && nights <= 60;
+  const estimate = selectedListing ? estimateTotalKES(nights, selectedListing.pricePerNightKES) : 0;
 
   useEffect(() => {
     let active = true;
@@ -81,8 +84,10 @@ export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }
     const choose = (event: Event) => {
       const count = (event as CustomEvent<number>).detail;
       if ([1, 2, 3].includes(count)) {
+        const option = options.find((item) => item.bedrooms === count);
+        if (!option) return;
+        setSelectedBedrooms(count);
         setValue("bedrooms", String(count) as EnquiryValues["bedrooms"]);
-        const option = options.find((item) => item.bedrooms === count) ?? options[2]!;
         if (Number(guestCount) > option.maxGuests) setValue("guests", String(option.maxGuests));
       }
     };
@@ -206,7 +211,9 @@ export default function EnquiryForm({ whatsappNumber, options = bedroomOptions }
       <Field id="guests" label="Number of guests" hint={`Sleeps up to ${selectedMax} for this option.`} error={errors.guests}><select id="guests" className={inputClass} aria-invalid={!!errors.guests} aria-describedby={errors.guests ? "guests-error" : undefined} {...register("guests")}>{guestChoices.map((count) => <option key={count} value={count}>{count} {count === 1 ? "guest" : "guests"}</option>)}</select></Field>
     </div>
     {unavailable && <p role="status" className="rounded-lg border border-[var(--border)] bg-white/70 px-4 py-3 text-sm">Those dates look unavailable, message us on WhatsApp to check.</p>}
-    {nights > 0 && selectedOption.pricePerNightKES > 0 && <p className="rounded-[var(--radius-input)] bg-[var(--surface)] px-4 py-3 text-sm">Estimated total: {selectedOption.priceMax && selectedOption.priceMax > selectedOption.pricePerNightKES ? "from " : ""}KES {estimate.toLocaleString()} for {nights} {nights === 1 ? "night" : "nights"} ({selectedOption.priceMax && selectedOption.priceMax > selectedOption.pricePerNightKES ? "from " : ""}KES {selectedOption.pricePerNightKES.toLocaleString()} per night).</p>}
+    {selectedListing && validDates && selectedListing.pricePerNightKES > 0
+      ? <p className="rounded-[var(--radius-input)] bg-[var(--surface)] px-4 py-3 text-sm">Estimated total: {selectedListing.priceMax && selectedListing.priceMax > selectedListing.pricePerNightKES ? "from " : ""}KES {estimate.toLocaleString()} for {nights} {nights === 1 ? "night" : "nights"} ({selectedListing.priceMax && selectedListing.priceMax > selectedListing.pricePerNightKES ? "from " : ""}KES {selectedListing.pricePerNightKES.toLocaleString()} per night). Final rate is confirmed by the host.</p>
+      : <p className="rounded-[var(--radius-input)] bg-[var(--surface)] px-4 py-3 text-sm">Your estimated total will appear here once you select a stay option and your dates.</p>}
     <Field id="message" label="Message (optional)" hint={`${message.length}/600`} error={errors.message}><textarea id="message" rows={4} className={`${inputClass} py-3`} aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-error" : undefined} {...register("message")} /></Field>
     <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 opacity-0" {...register("botcheck")} />
     <button type="submit" disabled={status === "sending"} className="button button-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit">{status === "sending" ? "Sending..." : "Send enquiry"}</button>
