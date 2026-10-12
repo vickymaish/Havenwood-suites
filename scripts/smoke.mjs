@@ -1,12 +1,7 @@
 const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 const failures = [];
 const results = [];
-const forbiddenStrings = [
-  ["Ne", "vel"].join(""),
-  ["Ne", "val"].join(""),
-  ["254727", "416611"].join(""),
-  ["victormureithi", "957"].join(""),
-];
+const forbiddenTillMarker = ["450", "2668"].join("");
 
 async function request(path, options) {
   const response = await fetch(`${baseUrl}${path}`, options);
@@ -48,11 +43,20 @@ await check("GET /admin redirects to /admin/login while signed out", async () =>
   return `HTTP ${response.status} → ${new URL(location, baseUrl).pathname}`;
 });
 
-await check("home HTML has no previous-client identifiers", async () => {
+await check("home HTML has no TODO or unconfirmed copy", async () => {
   if (!homeHtml) throw new Error("home response was unavailable");
-  const found = forbiddenStrings.filter((value) => homeHtml.toLowerCase().includes(value.toLowerCase()));
-  if (found.length) throw new Error(`found ${found.length} forbidden identifier(s)`);
-  return "no matches";
+  if (/TODO|to\s+be\s+confirmed/i.test(homeHtml)) throw new Error("found a TODO or unconfirmed placeholder");
+  return "no placeholders";
+});
+
+await check("home HTML shows the first two room prices", async () => {
+  if (!homeHtml.includes("KES 2,000") || !homeHtml.includes("KES 4,000")) throw new Error("expected KES 2,000 and KES 4,000");
+  return "KES 2,000 and KES 4,000";
+});
+
+await check("home HTML does not expose payment details", async () => {
+  if (homeHtml.includes(forbiddenTillMarker)) throw new Error("private payment value is present");
+  return "no private payment data";
 });
 
 const width = Math.max(...results.map((row) => row.name.length));

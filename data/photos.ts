@@ -1,11 +1,11 @@
 import type { Photo } from "@/lib/photos";
 import { siteConfig } from "./site";
 
-const photo = (id: string, src: string, alt: string, room: Photo["room"]): Photo => ({
+const photo = (id: string, src: string, alt: string, room: Photo["room"], listings: Photo["listings"] = [1, 2, 3]): Photo => ({
   id, src: `/images/${src}`, alt, room,
   width: ["havenwood-entry-mat.jpeg", "havenwood-entry-slippers.jpeg", "havenwood-exterior.jpeg", "havenwood-lounge-angle.jpeg"].includes(src) ? 1280 : 960,
   height: ["havenwood-entry-mat.jpeg", "havenwood-entry-slippers.jpeg", "havenwood-exterior.jpeg", "havenwood-lounge-angle.jpeg"].includes(src) ? 960 : 1280,
-  listings: [1, 2, 3], featured: id === "lounge", needsReview: false, needsNewPhoto: false,
+  listings, featured: id === "lounge", needsReview: false, needsNewPhoto: false,
 });
 
 export const photos: Photo[] = [
@@ -30,4 +30,6 @@ export const photos: Photo[] = [
   photo("lounge-wide", "havenwood-lounge-wide-2.jpeg", "Wide view of the furnished lounge", "living"),
   photo("lounge-tv-detail", "havenwood-lounge-tv-detail.jpeg", "Television and lounge wall", "living"),
   photo("dining-detail", "havenwood-dining-detail.jpeg", "Dining table and kitchen counter", "living"),
+  photo("kitchen-counter", "havenwood-kitchen-counter.jpeg", "Kitchen counter", "kitchen", [2]),
+  photo("bedroom-2", "havenwood-bedroom2.jpeg", "Second bedroom", "bedroom", [3]),
 ];
