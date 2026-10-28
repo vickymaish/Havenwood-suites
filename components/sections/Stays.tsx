@@ -9,9 +9,10 @@ import { formatNightlyPrice } from "@/lib/pricing";
 
 // Photo shown on each "Choose your stay" card, by photo id from data/photos.ts.
 // Change an id here to swap a card's photo. If an id doesn't exist, the card falls back to the automatic pick.
+// Photo shown on each "Choose your stay" card, by photo id from data/photos.ts.
 const CARD_PHOTO_IDS: Record<1 | 2 | 3, string> = {
   1: "lounge-seating", // havenwood-lounge-seating.jpeg
-  2: "lounge-tv",      // havenwood-lounge-tv.jpeg
+  2: "lounge-wide",    // havenwood-lounge-wide-2.jpeg
   3: "lounge",         // havenwood-lounge-wide.jpeg
 };
 
