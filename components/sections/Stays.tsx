@@ -3,8 +3,17 @@
 import Image from "next/image";
 import { bedroomOptions } from "@/data/site";
 import { content } from "@/data/content";
+import { photos } from "@/data/photos";
 import { getLeadPhotoForListing } from "@/lib/photos";
 import { formatNightlyPrice } from "@/lib/pricing";
+
+// Photo shown on each "Choose your stay" card, by photo id from data/photos.ts.
+// Change an id here to swap a card's photo. If an id doesn't exist, the card falls back to the automatic pick.
+const CARD_PHOTO_IDS: Record<1 | 2 | 3, string> = {
+  1: "lounge-seating", // havenwood-lounge-seating.jpeg
+  2: "lounge-tv",      // havenwood-lounge-tv.jpeg
+  3: "lounge",         // havenwood-lounge-wide.jpeg
+};
 
 type StayOption = { bedrooms: 1 | 2 | 3; label: string; pricePerNightKES: number; priceMax?: number; maxGuests: number };
 
@@ -17,7 +26,7 @@ export default function Stays({ options = bedroomOptions }: { options?: readonly
 }
 
 function StayCard({ option }: { option: StayOption }) {
-  const lead = getLeadPhotoForListing(option.bedrooms);
+  const lead = photos.find((p) => p.id === CARD_PHOTO_IDS[option.bedrooms]) ?? getLeadPhotoForListing(option.bedrooms);
   const select = () => {
     window.dispatchEvent(new CustomEvent("havenwood:bedrooms", { detail: option.bedrooms }));
     document.getElementById("booking")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
