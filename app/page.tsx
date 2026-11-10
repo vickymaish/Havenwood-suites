@@ -3,9 +3,10 @@ import { join } from "node:path";
 import Image from "next/image";
 import { property } from "@/data/property";
 import { content } from "@/data/content";
-import { BookingLink, FAQ, FloatingWhatsApp, Navigation, PhotoGallery, Reveal, WhatsAppLink } from "@/components/site";
+import { BookingLink, FAQ, FloatingWhatsApp, Navigation, Reveal, WhatsAppLink } from "@/components/site";
 import Booking from "@/components/sections/Booking";
 import BookingCard from "@/components/booking/BookingCard";
+import Gallery from "@/components/sections/Gallery";
 import Stays from "@/components/sections/Stays";
 import { siteConfig, heroImage, heroObjectPosition } from "@/data/site";
 import { getPublicSettings } from "@/lib/public-settings";
@@ -60,10 +61,7 @@ export default async function Home() {
       </Reveal>
     </section>
     <Stays options={settings.bedroom_options} />
-    <section id="gallery" className="section-pad wrap">
-      <Reveal><p className="eyebrow text-[var(--accent)]">A CLOSER LOOK</p><h2 className="font-heading mt-3 text-[clamp(2.25rem,4.5vw,4rem)] font-semibold">{content.gallery.title}</h2></Reveal>
-      <PhotoGallery />
-    </section>
+    <Gallery />
     <section id="find-us" className="section-pad bg-[var(--surface)]">
       <div className="wrap">
         <Reveal><p className="eyebrow text-[var(--accent)]">{content.directions.eyebrow}</p><h2 className="font-heading mt-3 text-[clamp(2.25rem,4.5vw,4rem)] font-semibold">{content.directions.title}</h2></Reveal>
