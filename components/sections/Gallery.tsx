@@ -8,11 +8,11 @@ import { getUniquePhotos, type Photo } from "@/lib/photos";
 import { Reveal } from "@/components/site";
 
 const featuredPhotoIds = [
-  "green-lounge-wide",
-  "green-bedroom",
-  "green-lounge-sofa",
-  "green-bedroom-doorway",
-  "green-lounge-lights",
+  "lounge",
+  "bedroom-daylight",
+  "lounge-detail",
+  "bedroom-single",
+  "kitchenette",
 ];
 
 export default function Gallery() {
